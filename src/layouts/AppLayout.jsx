@@ -38,7 +38,7 @@ const AppLayout = () => {
       {/* --- SIDEBAR --- */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-100 flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-white font-bold">
+          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center text-black font-bold">
             P
           </div>
           <span className="font-bold text-gray-800">PMS System</span>
@@ -48,7 +48,7 @@ const AppLayout = () => {
           <div className="px-4 mb-2 flex items-center justify-between">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Workspaces</h3>
             <button onClick={() => setIsModalOpen(true)} className="text-gray-400 hover:text-primary-600">
-              <Plus size={16} />
+              <Plus className='cursor-pointer' size={16} />
             </button>
           </div>
           
