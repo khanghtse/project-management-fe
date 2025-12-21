@@ -6,6 +6,7 @@ import Label from '../../components/ui/Lable';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import toast from 'react-hot-toast';
+import { Flag } from 'lucide-react';
 
 const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) => {
   const { register, handleSubmit, reset } = useForm();
@@ -18,7 +19,8 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
       await taskService.createTask(projectId, {
         ...data,
         columnId: columnId,
-        priority: 'MEDIUM' // Tạm thời hardcode, sau này thêm select
+        // Nếu user không chọn gì thì mặc định là MEDIUM
+        priority: data.priority || 'MEDIUM' 
       });
       
       reset();
@@ -44,6 +46,24 @@ const CreateTaskModal = ({ isOpen, onClose, projectId, columnId, onSuccess }) =>
             autoFocus
           />
         </div>
+
+        {/* --- PRIORITY SELECTION --- */}
+        <div>
+          <Label>Mức độ ưu tiên</Label>
+          <div className="relative">
+            <Flag className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <select
+              {...register("priority")}
+              className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all cursor-pointer"
+            >
+              <option value="LOW">Low (Thấp)</option>
+              <option value="MEDIUM">Medium (Trung bình)</option>
+              <option value="HIGH">High (Cao)</option>
+              <option value="URGENT">Urgent (Khẩn cấp)</option>
+            </select>
+          </div>
+        </div>
+
         <div>
           <Label>Mô tả chi tiết</Label>
           <textarea 

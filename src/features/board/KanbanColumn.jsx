@@ -4,7 +4,7 @@ import React from 'react'
 import TaskCard from './TaskCard';
 import { Plus } from 'lucide-react';
 
-const KanbanColumn = ({ column, tasks, onAddTask }) => {
+const KanbanColumn = ({ column, tasks, onAddTask, onTaskClick }) => {
   const { setNodeRef } = useDroppable({
     id: column.id,
     data: { type: 'COLUMN', ...column } // Để biết đang thả vào cột nào
@@ -40,7 +40,7 @@ const KanbanColumn = ({ column, tasks, onAddTask }) => {
           strategy={verticalListSortingStrategy}
         >
           {tasks.map(task => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)}/>
           ))}
         </SortableContext>
         
