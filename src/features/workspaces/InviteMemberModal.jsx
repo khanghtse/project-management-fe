@@ -6,6 +6,7 @@ import { Mail } from 'lucide-react';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import { workspaceService } from '../../services/WorkspaceService';
+import toast from 'react-hot-toast';
 
 const InviteMemberModal = ({ isOpen, onClose, workspaceId }) => {
   const { register, handleSubmit, reset } = useForm();
@@ -15,11 +16,13 @@ const InviteMemberModal = ({ isOpen, onClose, workspaceId }) => {
     setLoading(true);
     try {
       await workspaceService.inviteMember(workspaceId, data.email);
-      alert(`Đã gửi lời mời tới ${data.email}`);
+      //alert(`Đã gửi lời mời tới ${data.email}`);
       reset();
       onClose();
+      toast.success("Gửi lời mời thành công");
     } catch (error) {
-      alert(error.response?.data?.message || "Lỗi gửi lời mời");
+      //alert(error.response?.data?.message || "Lỗi gửi lời mời");
+      toast.error(error.response?.data?.message || "Lỗi gửi lời mời");
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import AppLayout from './layouts/AppLayout';
 import ProjectListPage from './features/projects/ProjectListPage';
 import KanbanBoard from './features/board/KanbanBoard';
+import AcceptInvitePage from './features/workspaces/AcceptInvitePage';
 
 // Component bảo vệ Route (chỉ cho user đã login vào)
 const ProtectedRoute = () => {
@@ -46,6 +47,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/oauth2/redirect" element={<OAuth2Redirect />} />
+        {/* Route Xử lý Lời mời (Tự kiểm tra auth bên trong) */}
+        <Route path="/accept-invite" element={<AcceptInvitePage />} />
 
         {/* Protected Routes (Bên trong Dashboard) */}
         <Route element={<ProtectedRoute />}>

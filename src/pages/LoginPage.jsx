@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/AuthService';
 import Card from '../components/ui/Card';
 import CardHeader from '../components/ui/CardHeader';
@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams(); // Lấy param từ URL
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -28,7 +29,15 @@ const LoginPage = () => {
     try {
       const data = await authService.login(formData.email, formData.password);
       localStorage.setItem('accessToken', data.accessToken);
-      navigate('/'); // Về trang Dashboard
+      // --- LOGIC MỚI: KIỂM TRA RETURN URL ---
+      const returnUrl = searchParams.get('returnUrl');
+      if (returnUrl) {
+        // Nếu có returnUrl (ví dụ từ trang accept-invite), giải mã và điều hướng tới đó
+        navigate(decodeURIComponent(returnUrl));
+      } else {
+        // Nếu không, về trang chủ như bình thường
+        navigate('/');
+      }
       toast.success('Đăng nhập thành công');
     } catch (err) {
       setError(err.response?.data?.message || 'Đăng nhập thất bại');
