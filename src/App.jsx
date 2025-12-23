@@ -8,6 +8,8 @@ import AppLayout from './layouts/AppLayout';
 import ProjectListPage from './features/projects/ProjectListPage';
 import KanbanBoard from './features/board/KanbanBoard';
 import AcceptInvitePage from './features/workspaces/AcceptInvitePage';
+import ForgotPasswordPage from './features/auth/ForgotPasswordPage';
+import ResetPasswordPage from './features/auth/ResetPasswordPage';
 
 // Component bảo vệ Route (chỉ cho user đã login vào)
 const ProtectedRoute = () => {
@@ -49,6 +51,9 @@ function App() {
         <Route path="/oauth2/redirect" element={<OAuth2Redirect />} />
         {/* Route Xử lý Lời mời (Tự kiểm tra auth bên trong) */}
         <Route path="/accept-invite" element={<AcceptInvitePage />} />
+        {/* Route Quên mật khẩu */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Protected Routes (Bên trong Dashboard) */}
         <Route element={<ProtectedRoute />}>

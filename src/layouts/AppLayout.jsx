@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { workspaceService } from '../services/WorkspaceService';
 import { Briefcase, ChevronRight, LogOut, Plus } from 'lucide-react';
 import CreateWorkspaceModal from '../features/workspaces/CreateWorkspaceModal';
+import toast from 'react-hot-toast';
 
 const AppLayout = () => {
   const [workspaces, setWorkspaces] = useState([]);
@@ -31,6 +32,7 @@ const AppLayout = () => {
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     window.location.href = '/login';
+    toast.success('Đăng xuất thành công');
   };
 
   return (
