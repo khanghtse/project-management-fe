@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { authService } from '../services/AuthService';
-import Card from '../components/ui/Card';
-import CardHeader from '../components/ui/CardHeader';
-import CardContent from '../components/ui/CardContent';
+import { authService } from '../../services/AuthService';
+import Card from '../../components/ui/Card';
+import CardHeader from '../../components/ui/CardHeader';
+import CardContent from '../../components/ui/CardContent';
 import { AlertCircle, Lock, Mail, User } from 'lucide-react';
-import Label from '../components/ui/Lable';
-import Input from '../components/ui/Input';
-import Button from '../components/ui/Button';
+import Label from '../../components/ui/Lable';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
 
 const RegisterPage = () => {
   const navigate = useNavigate();

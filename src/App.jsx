@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import OAuth2Redirect from './pages/OAuth2Redirect';
+import LoginPage from './features/auth/LoginPage';
+import RegisterPage from './features/auth/RegisterPage';
+import OAuth2Redirect from './features/auth/OAuth2Redirect';
 import { Toaster } from 'react-hot-toast';
 import AppLayout from './layouts/AppLayout';
 import ProjectListPage from './features/projects/ProjectListPage';

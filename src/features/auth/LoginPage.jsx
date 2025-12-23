@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { authService } from '../services/AuthService';
-import Card from '../components/ui/Card';
-import CardHeader from '../components/ui/CardHeader';
-import CardContent from '../components/ui/CardContent';
-import Label from '../components/ui/Lable';
+import { authService } from '../../services/AuthService';
+import Card from '../../components/ui/Card';
+import CardHeader from '../../components/ui/CardHeader';
+import CardContent from '../../components/ui/CardContent';
+import Label from '../../components/ui/Lable';
 import { AlertCircle, Lock, Mail } from 'lucide-react';
-import Input from '../components/ui/Input';
-import Button from '../components/ui/Button';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
 import toast from 'react-hot-toast';
 
 const LoginPage = () => {
