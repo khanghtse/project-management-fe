@@ -4,42 +4,55 @@ import { workspaceService } from '../../services/WorkspaceService';
 import Modal from '../../components/ui/Modal';
 import Label from '../../components/ui/Lable';
 import Input from '../../components/ui/Input';
-import { Check, Flag, Trash2 } from 'lucide-react';
+import { Calendar, Check, Flag, Trash2, User } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import { taskService } from '../../services/TaskService';
 import TaskComments from './TaskComments';
+import TaskChecklist from './TaskChecklist';
 
 const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEdit, onSuccess }) => {
-  const { register, handleSubmit, reset, setValue, watch } = useForm();
+  const { register, handleSubmit, reset, setValue } = useForm();
   const [loading, setLoading] = useState(false);
-  const [members, setMembers] = useState([]); // List thành viên workspace
-  
-  // State quản lý danh sách assignee đã chọn (Set of IDs)
+  const [members, setMembers] = useState([]);
   const [selectedAssignees, setSelectedAssignees] = useState(new Set());
+  
+  // State lưu task hiện tại (được cập nhật realtime)
+  const [currentTask, setCurrentTask] = useState(taskToEdit);
 
-  // Load data khi mở modal
   useEffect(() => {
     if (isOpen) {
-      // 1. Load members
       if (workspaceId) {
         workspaceService.getMembers(workspaceId).then(setMembers).catch(console.error);
       }
-
-      // 2. Setup form data
       if (taskToEdit) {
         setValue('title', taskToEdit.title);
         setValue('description', taskToEdit.description);
         setValue('priority', taskToEdit.priority);
-        // Set assignees từ task cũ
         const ids = new Set(taskToEdit.assignees?.map(u => u.id) || []);
         setSelectedAssignees(ids);
+        setCurrentTask(taskToEdit); // Reset currentTask mỗi khi mở modal
       } else {
         reset();
         setValue('priority', 'MEDIUM');
         setSelectedAssignees(new Set());
+        setCurrentTask(null);
       }
     }
   }, [isOpen, taskToEdit, workspaceId]);
+
+  // --- HÀM LÀM MỚI DỮ LIỆU TASK ---
+  const refreshCurrentTask = async () => {
+    if (currentTask) {
+      try {
+        // Gọi API lấy task mới nhất (Cần đảm bảo API getTask đã có ở service)
+        const updatedTask = await taskService.getTask(currentTask.id);
+        setCurrentTask(updatedTask);
+        onSuccess(); // Vẫn gọi onSuccess để cập nhật Board bên ngoài
+      } catch (error) {
+        console.error("Failed to refresh task", error);
+      }
+    }
+  };
 
   const toggleAssignee = (userId) => {
     const newSet = new Set(selectedAssignees);
@@ -57,14 +70,13 @@ const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEd
 
     try {
       if (taskToEdit) {
-        // UPDATE MODE
-        await taskService.updateTask(taskToEdit.id, payload);
+        const updated = await taskService.updateTask(taskToEdit.id, payload);
+        setCurrentTask(updated); // Cập nhật luôn UI sau khi sửa
       } else {
-        // CREATE MODE
         await taskService.createTask(projectId, { ...payload, columnId });
       }
-      onSuccess(); // Refresh board
-      onClose();
+      onSuccess();
+      if (!taskToEdit) onClose(); // Nếu tạo mới thì đóng, sửa thì giữ nguyên
     } catch (error) {
       alert("Có lỗi xảy ra!");
     } finally {
@@ -82,86 +94,111 @@ const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEd
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={taskToEdit ? `Cập nhật ${taskToEdit.displayId}` : "Thêm công việc mới"}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        
-        {/* Title */}
-        <div>
-          <Label>Tiêu đề <span className="text-red-500">*</span></Label>
-          <Input {...register("title", { required: true })} placeholder="Tên công việc" autoFocus />
-        </div>
-
-        {/* Priority */}
-        <div>
-          <Label>Mức độ ưu tiên</Label>
-          <div className="relative">
-            <Flag className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <select
-              {...register("priority")}
-              className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 pl-10 text-sm focus:ring-2 focus:ring-primary-500"
-            >
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="URGENT">Urgent</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Assignees (Multi-select Custom UI) */}
-        <div>
-          <Label>Người thực hiện ({selectedAssignees.size})</Label>
-          <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto space-y-1">
-            {members.length === 0 && <p className="text-xs text-gray-400">Chưa có thành viên nào.</p>}
-            {members.map(member => (
-              <div 
-                key={member.id} 
-                onClick={() => toggleAssignee(member.id)}
-                className={`flex items-center gap-2 p-2 rounded cursor-pointer text-sm ${selectedAssignees.has(member.id) ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-100'}`}
-              >
-                <div className={`w-4 h-4 border rounded flex items-center justify-center ${selectedAssignees.has(member.id) ? 'bg-primary-600 border-primary-600' : 'border-gray-300'}`}>
-                   {selectedAssignees.has(member.id) && <Check size={10} className="text-white" />}
-                </div>
-                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold">
-                    {member.avatarUrl ? <img src={member.avatarUrl} className="rounded-full"/> : member.name.charAt(0)}
-                </div>
-                <span>{member.name}</span>
-                <span className="text-xs text-gray-400 ml-auto">{member.email}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Description */}
-        <div>
-          <Label>Mô tả</Label>
-          <textarea 
-            {...register("description")} 
-            className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-primary-500 min-h-[100px]"
-            rows={3}
-            placeholder="Chi tiết công việc..."
-          />
-        </div>
-
-        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
-          {taskToEdit ? (
-             <Button type="button" variant="ghost" className="text-red-600 hover:bg-red-50 hover:text-red-700" onClick={handleDelete}>
-                <Trash2 size={16} className="mr-2" /> Xóa Task
-             </Button>
-          ) : <div></div>}
+    <Modal isOpen={isOpen} onClose={onClose} title={currentTask ? currentTask.displayId : "Tạo công việc"} className="max-w-5xl">
+      <form id="task-form" onSubmit={handleSubmit(onSubmit)}>
+        <div className="flex flex-col md:flex-row gap-8">
           
-          <div className="flex gap-2">
-            <Button type="button" variant="ghost" onClick={onClose}>Hủy</Button>
-            <Button type="submit" variant="ghost" isLoading={loading}>
-              {taskToEdit ? 'Lưu thay đổi' : 'Thêm thẻ'}
-            </Button>
+          {/* --- MAIN CONTENT --- */}
+          <div className="flex-1 space-y-6">
+            <div>
+              <input 
+                {...register("title", { required: true })} 
+                className="w-full text-2xl font-bold text-gray-900 border-none p-0 focus:ring-0 placeholder:text-gray-300"
+                placeholder="Nhập tên công việc..."
+              />
+            </div>
+
+            <div>
+              <Label className="text-gray-500 mb-2 uppercase text-xs font-bold tracking-wide">Mô tả</Label>
+              <textarea 
+                {...register("description")} 
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-primary-200 focus:border-primary-500 min-h-[120px] transition-all"
+                rows={4}
+                placeholder="Thêm mô tả chi tiết..."
+              />
+            </div>
+
+            {/* Subtasks - Truyền refreshCurrentTask vào onUpdate */}
+            {currentTask && (
+              <TaskChecklist 
+                taskId={currentTask.id} 
+                subTasks={currentTask.subTasks}
+                onUpdate={refreshCurrentTask} 
+              />
+            )}
+
+            {/* Comments */}
+            {currentTask && <TaskComments taskId={currentTask.id} />}
+          </div>
+
+          {/* --- SIDEBAR --- */}
+          <div className="w-full md:w-80 space-y-6">
+            <div className="flex flex-col gap-2">
+               <Label className="text-gray-500 uppercase text-xs font-bold tracking-wide">Hành động</Label>
+               <Button type="submit" variant="ghost" isLoading={loading} className="w-full justify-center">
+                 {taskToEdit ? 'Lưu thay đổi' : 'Tạo công việc'}
+               </Button>
+               {taskToEdit && (
+                 <Button type="button" variant="outline" className="w-full justify-center text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300" onClick={handleDelete}>
+                    <Trash2 size={16} className="mr-2" /> Xóa thẻ
+                 </Button>
+               )}
+            </div>
+
+            <hr className="border-gray-100" />
+
+            <div>
+              <Label className="text-gray-500 uppercase text-xs font-bold tracking-wide mb-2 block">Mức độ ưu tiên</Label>
+              <div className="relative">
+                <Flag className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                <select
+                  {...register("priority")}
+                  className="w-full h-9 pl-9 pr-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:border-primary-500 cursor-pointer"
+                >
+                  <option value="LOW">Low (Thấp)</option>
+                  <option value="MEDIUM">Medium (Vừa)</option>
+                  <option value="HIGH">High (Cao)</option>
+                  <option value="URGENT">Urgent (Khẩn cấp)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-gray-500 uppercase text-xs font-bold tracking-wide mb-2 block">
+                Người thực hiện <span className="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full ml-1">{selectedAssignees.size}</span>
+              </Label>
+              <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+                <div className="max-h-60 overflow-y-auto p-1 custom-scrollbar">
+                  {members.map(member => (
+                    <div 
+                      key={member.id} 
+                      onClick={() => toggleAssignee(member.id)}
+                      className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors ${selectedAssignees.has(member.id) ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                    >
+                      <div className={`w-4 h-4 border rounded flex items-center justify-center bg-white ${selectedAssignees.has(member.id) ? 'border-primary-600' : 'border-gray-300'}`}>
+                         {selectedAssignees.has(member.id) && <div className="w-2.5 h-2.5 bg-primary-600 rounded-[1px]" />}
+                      </div>
+                      <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-600 overflow-hidden">
+                          {member.avatarUrl ? <img src={member.avatarUrl} className="w-full h-full object-cover"/> : member.name.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-700 truncate">{member.name}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {currentTask && (
+                <div className="text-xs text-gray-400 space-y-1 pt-2 border-t border-gray-100">
+                    <p className="flex items-center gap-2"><Calendar size={12}/> Tạo lúc: {new Date(currentTask.createdAt).toLocaleString('vi-VN')}</p>
+                    <p className="flex items-center gap-2"><User size={12}/> ID: {currentTask.displayId}</p>
+                </div>
+            )}
           </div>
         </div>
       </form>
-      {/* Chỉ hiện comment khi đang Edit (taskToEdit tồn tại) */}
-      {taskToEdit && (
-         <TaskComments taskId={taskToEdit.id} />
-      )}
     </Modal>
   );
 }

@@ -29,5 +29,25 @@ export const taskService = {
     // Xóa Task
     deleteTask: async (taskId) => {
         await api.delete(`/tasks/${taskId}`);
-    }
+    },
+
+    // Subtasks
+    createSubTask: async (parentTaskId, title) => {
+        const res = await api.post(`/tasks/${parentTaskId}/subtasks`, { title });
+        return res.data;
+    },
+
+    toggleSubTask: async (subTaskId) => {
+        const res = await api.patch(`/subtasks/${subTaskId}/toggle`);
+        return res.data;
+    },
+
+    deleteSubTask: async (subTaskId) => {
+        await api.delete(`/subtasks/${subTaskId}`);
+    },
+
+    getTask: async (taskId) => {
+        const res = await api.get(`/tasks/${taskId}`);
+        return res.data;
+    },
 }

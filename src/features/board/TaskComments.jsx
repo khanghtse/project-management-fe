@@ -32,7 +32,9 @@ const TaskComments = ({ taskId }) => {
   };
 
   const handleSend = async (e) => {
-    e.preventDefault();
+    // Nếu được gọi từ sự kiện (ví dụ click button hoặc keydown), ngăn chặn hành vi mặc định
+    if (e && e.preventDefault) e.preventDefault();
+    
     if (!newComment.trim()) return;
 
     setLoading(true);
@@ -48,19 +50,27 @@ const TaskComments = ({ taskId }) => {
     }
   };
 
+  // Xử lý nhấn Enter trong ô input
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Ngăn submit form cha (TaskModal)
+      handleSend();
+    }
+  };
+
   return (
     <div className="mt-6 border-t border-gray-100 pt-4">
       <h3 className="font-semibold text-sm text-gray-700 mb-3">Bình luận</h3>
       
       {/* List Comments */}
-      <div className="space-y-4 max-h-[200px] overflow-y-auto mb-4 pr-1">
+      <div className="space-y-4 max-h-[200px] overflow-y-auto mb-4 pr-1 custom-scrollbar">
         {comments.length === 0 && <p className="text-xs text-gray-400 italic">Chưa có bình luận nào.</p>}
         
         {comments.map((comment) => (
           <div key={comment.id} className="flex gap-3">
             {/* Avatar */}
-            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 shrink-0">
-               {comment.author.avatarUrl ? <img src={comment.author.avatarUrl} className="rounded-full w-full h-full object-cover"/> : comment.author.name.charAt(0)}
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 shrink-0 overflow-hidden">
+               {comment.author.avatarUrl ? <img src={comment.author.avatarUrl} className="w-full h-full object-cover" alt="avatar"/> : comment.author.name.charAt(0)}
             </div>
             
             {/* Content */}
@@ -80,8 +90,8 @@ const TaskComments = ({ taskId }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Form */}
-      <form onSubmit={handleSend} className="flex gap-2 items-center">
+      {/* Input Area - Thay đổi từ <form> sang <div> để tránh lỗi lồng form */}
+      <div className="flex gap-2 items-center">
         <div className="relative flex-1">
           <input
             type="text"
@@ -89,19 +99,21 @@ const TaskComments = ({ taskId }) => {
             placeholder="Viết bình luận..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
+            onKeyDown={handleKeyDown} // Bắt sự kiện Enter tại đây
             disabled={loading}
           />
         </div>
         <Button 
+            type="button" // Quan trọng: type="button" để không submit form cha
+            onClick={handleSend}
             variant="ghost"
-            type="submit" 
             size="sm" 
             className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
             disabled={loading || !newComment.trim()}
         >
             <Send size={16} />
         </Button>
-      </form>
+      </div>
     </div>
   );
 }
