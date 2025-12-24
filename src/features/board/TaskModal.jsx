@@ -7,6 +7,7 @@ import Input from '../../components/ui/Input';
 import { Check, Flag, Trash2 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import { taskService } from '../../services/TaskService';
+import TaskComments from './TaskComments';
 
 const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEdit, onSuccess }) => {
   const { register, handleSubmit, reset, setValue, watch } = useForm();
@@ -157,6 +158,10 @@ const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEd
           </div>
         </div>
       </form>
+      {/* Chỉ hiện comment khi đang Edit (taskToEdit tồn tại) */}
+      {taskToEdit && (
+         <TaskComments taskId={taskToEdit.id} />
+      )}
     </Modal>
   );
 }
