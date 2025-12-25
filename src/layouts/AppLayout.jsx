@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { workspaceService } from '../services/WorkspaceService';
-import { Briefcase, ChevronRight, LogOut, Plus } from 'lucide-react';
+import { Briefcase, ChevronRight, LogOut, Plus, User } from 'lucide-react';
 import CreateWorkspaceModal from '../features/workspaces/CreateWorkspaceModal';
 import toast from 'react-hot-toast';
 
@@ -79,7 +79,17 @@ const AppLayout = () => {
           </nav>
         </div>
 
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-gray-100 space-y-2">
+          {/* Nút Profile */}
+          <button 
+            onClick={() => navigate('/profile')}
+            className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100"
+          >
+            <User size={18} className="mr-3 text-gray-400" />
+            Tài khoản của tôi
+          </button>
+
+          {/* Nút Đăng xuất */}
           <button 
             onClick={handleLogout}
             className="flex items-center w-full px-3 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50"

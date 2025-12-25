@@ -10,6 +10,7 @@ import KanbanBoard from './features/board/KanbanBoard';
 import AcceptInvitePage from './features/workspaces/AcceptInvitePage';
 import ForgotPasswordPage from './features/auth/ForgotPasswordPage';
 import ResetPasswordPage from './features/auth/ResetPasswordPage';
+import ProfilePage from './features/users/ProfilePage';
 
 // Component bảo vệ Route (chỉ cho user đã login vào)
 const ProtectedRoute = () => {
@@ -62,6 +63,7 @@ function App() {
             <Route path="/workspaces/:workspaceId" element={<ProjectListPage />} />
             {/* Route mới: Khi click vào 1 project */}
              <Route path="/projects/:projectId/board" element={<BoardPage />} />
+             <Route path="/profile" element={<ProfilePage />} />
           </Route>
         </Route>
       </Routes>
