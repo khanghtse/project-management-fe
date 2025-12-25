@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { taskService } from '../../services/TaskService';
 import { arrayMove } from '@dnd-kit/sortable';
 import KanbanColumn from './KanbanColumn';
-import TaskCard from './TaskCard';
-import TaskModal from './TaskModal';
+import TaskCard from '../tasks/TaskCard';
+import TaskModal from '../tasks/TaskModal';
 
 const KanbanBoard = ({ projectId }) => {
   const [columns, setColumns] = useState([]);

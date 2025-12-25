@@ -9,6 +9,8 @@ import Button from '../../components/ui/Button';
 import { taskService } from '../../services/TaskService';
 import TaskComments from './TaskComments';
 import TaskChecklist from './TaskChecklist';
+import toast from 'react-hot-toast';
+import TaskAttachments from './TaskAttachments';
 
 const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEdit, onSuccess }) => {
   const { register, handleSubmit, reset, setValue } = useForm();
@@ -72,8 +74,10 @@ const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEd
       if (taskToEdit) {
         const updated = await taskService.updateTask(taskToEdit.id, payload);
         setCurrentTask(updated); // Cập nhật luôn UI sau khi sửa
+        toast.success("Cập nhật công việc thành công");
       } else {
         await taskService.createTask(projectId, { ...payload, columnId });
+        toast.success("Tạo công việc thành công");
       }
       onSuccess();
       if (!taskToEdit) onClose(); // Nếu tạo mới thì đóng, sửa thì giữ nguyên
@@ -90,6 +94,7 @@ const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEd
       await taskService.deleteTask(taskToEdit.id);
       onSuccess();
       onClose();
+      toast.success("Xóa task thành công");
     } catch (e) { alert("Lỗi xóa task"); }
   };
 
@@ -126,6 +131,14 @@ const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEd
                 onUpdate={refreshCurrentTask} 
               />
             )}
+
+            {/* --- ATTACHMENTS --- */}
+             {currentTask && (
+                <>
+                  <hr className="border-gray-100" />
+                  <TaskAttachments taskId={currentTask.id} />
+                </>
+             )}
 
             {/* Comments */}
             {currentTask && <TaskComments taskId={currentTask.id} />}

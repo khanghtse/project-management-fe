@@ -123,7 +123,7 @@ const TaskChecklist = ({ taskId, subTasks = [], onUpdate }) => {
             onKeyDown={e => e.key === 'Enter' && handleAdd()}
           />
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleAdd} disabled={loading}>Thêm</Button>
+            <Button size="sm" variant="ghost" onClick={handleAdd} disabled={loading}>Thêm</Button>
             <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>Hủy</Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import React from 'react'
-import TaskCard from './TaskCard';
+import TaskCard from '../tasks/TaskCard';
 import { Plus } from 'lucide-react';
 
 const KanbanColumn = ({ column, tasks, onAddTask, onTaskClick }) => {
