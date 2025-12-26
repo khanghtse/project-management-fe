@@ -2,10 +2,11 @@ import api from "../libs/axios"
 
 export const taskService = {
     // Lấy dữ liệu Board
-    getBoard: async (projectId) => {
-        const res = await api.get(`/projects/${projectId}/board`);
-        return res.data;
-    },
+    getBoard: async (projectId, params) => {
+    // params = { keyword, priority, isMyTask }
+    const res = await api.get(`/projects/${projectId}/board`, { params });
+    return res.data;
+  },
 
     // Tạo Task mới
     createTask: async (projectId, data) => {

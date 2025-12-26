@@ -1,51 +1,73 @@
 import { closestCorners, DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { taskService } from '../../services/TaskService';
 import { arrayMove } from '@dnd-kit/sortable';
 import KanbanColumn from './KanbanColumn';
 import TaskCard from '../tasks/TaskCard';
 import TaskModal from '../tasks/TaskModal';
+import BoardToolbar from './BoardToolbar';
+import useDebounce from '../../hooks/useDebounce';
+
 
 const KanbanBoard = ({ projectId }) => {
   const [columns, setColumns] = useState([]);
-  const [activeTask, setActiveTask] = useState(null); // Task đang được kéo
+  const [activeTask, setActiveTask] = useState(null); 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState(null);
-
-  // State lưu Workspace ID lấy từ API
   const [workspaceId, setWorkspaceId] = useState(null); 
   const [editingTask, setEditingTask] = useState(null);
 
+  // --- STATE CHO FILTER ---
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterMyTasks, setFilterMyTasks] = useState(false);
+  const [filterPriority, setFilterPriority] = useState(null);
+
+  // Debounce search term để không gọi API liên tục khi gõ
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 },
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
 
+  // Gọi API mỗi khi filter thay đổi
   useEffect(() => {
     if (projectId) {
         fetchBoard();
     }
-  }, [projectId]);
+  }, [projectId, debouncedSearchTerm, filterMyTasks, filterPriority]);
 
   const fetchBoard = async () => {
     try {
-      const data = await taskService.getBoard(projectId);
-      // Data format: { projectId, workspaceId, columns: [...] }
+      // Truyền params vào API
+      const params = {
+          keyword: debouncedSearchTerm || undefined,
+          priority: filterPriority || undefined,
+          isMyTask: filterMyTasks || undefined
+      };
+      
+      const data = await taskService.getBoard(projectId, params);
       setColumns(data.columns);
-      setWorkspaceId(data.workspaceId); // Lưu workspaceId vào state
+      setWorkspaceId(data.workspaceId);
     } catch (error) {
       console.error("Failed to load board", error);
     }
   };
 
+  // ... (Phần logic drag and drop giữ nguyên) ...
+  // Lưu ý: Vẫn giữ check chặn drag khi đang filter
+  const isFiltering = !!(debouncedSearchTerm || filterMyTasks || filterPriority);
+
   const handleDragStart = (event) => {
+    if (isFiltering) return; // Chặn
     const { active } = event;
     const task = findTaskById(active.id);
     setActiveTask(task);
   };
-
+  
   const handleDragEnd = async (event) => {
+    if (isFiltering) return; // Chặn
+
+    // ... (Code handleDragEnd cũ giữ nguyên toàn bộ)
     const { active, over } = event;
     setActiveTask(null);
 
@@ -136,9 +158,14 @@ const KanbanBoard = ({ projectId }) => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b bg-white flex justify-between items-center shadow-sm z-10">
-         <h2 className="text-xl font-bold text-gray-800">Kanban Board</h2>
-      </div>
+      <BoardToolbar 
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filterMyTasks={filterMyTasks}
+        onToggleMyTasks={() => setFilterMyTasks(!filterMyTasks)}
+        filterPriority={filterPriority}
+        onFilterPriority={(p) => setFilterPriority(prev => prev === p ? null : p)}
+      />
       
       <div className="flex-1 overflow-x-auto overflow-y-hidden bg-gray-100/50 p-6">
         <DndContext 
@@ -148,13 +175,14 @@ const KanbanBoard = ({ projectId }) => {
           onDragEnd={handleDragEnd}
         >
           <div className="flex h-full gap-6 items-start">
+            {/* Render columns như bình thường */}
             {columns.map(col => (
               <KanbanColumn 
                 key={col.id} 
                 column={col} 
                 tasks={col.tasks} 
                 onAddTask={handleOpenCreateModal}
-                onTaskClick={handleTaskClick} // Truyền prop này vào KanbanColumn -> TaskCard
+                onTaskClick={handleTaskClick}
               />
             ))}
           </div>
@@ -173,7 +201,7 @@ const KanbanBoard = ({ projectId }) => {
         }}
         columnId={selectedColumnId}
         projectId={projectId}
-        workspaceId={workspaceId} // Đã có giá trị thật từ API
+        workspaceId={workspaceId}
         taskToEdit={editingTask}
         onSuccess={fetchBoard}
       />
