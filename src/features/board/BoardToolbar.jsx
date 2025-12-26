@@ -1,7 +1,8 @@
-import { Search, User, X, Filter } from 'lucide-react';
+import { Search, User, X, Filter, Kanban, BarChart2 } from 'lucide-react';
 import React from 'react'
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const BoardToolbar = ({ 
   searchTerm, 
@@ -10,8 +11,15 @@ const BoardToolbar = ({
   onToggleMyTasks,
   filterPriority,
   onFilterPriority,
-  members = [] // Danh sách thành viên để hiển thị avatar bộ lọc (optional, làm sau)
+  members = [],
+  projectId // Danh sách thành viên để hiển thị avatar bộ lọc (optional, làm sau)
 }) => {
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const isDashboard = location.pathname.includes('/dashboard');
+
   return (
     <div className="flex flex-col md:flex-row gap-4 justify-between items-center p-4 bg-white border-b border-gray-200">
       
@@ -33,6 +41,22 @@ const BoardToolbar = ({
           </button>
         )}
       </div>
+
+      {/* --- NAVIGATION SWITCHER --- */}
+      <div className="flex bg-gray-100 p-1 rounded-lg order-last md:order-none w-full md:w-auto justify-center">
+          <button 
+             onClick={() => navigate(`/projects/${projectId}/board`)}
+             className={`flex-1 md:flex-none justify-center px-3 py-1.5 rounded-md flex items-center gap-2 text-sm font-medium transition-all ${!isDashboard ? 'bg-white shadow text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+             <Kanban size={16} /> <span className="hidden sm:inline">Board</span>
+          </button>
+          <button 
+             onClick={() => navigate(`/projects/${projectId}/dashboard`)}
+             className={`flex-1 md:flex-none justify-center px-3 py-1.5 rounded-md flex items-center gap-2 text-sm font-medium transition-all ${isDashboard ? 'bg-white shadow text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+             <BarChart2 size={16} /> <span className="hidden sm:inline">Dashboard</span>
+          </button>
+       </div>
 
       {/* 2. Các Bộ Lọc */}
       <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 custom-scrollbar">

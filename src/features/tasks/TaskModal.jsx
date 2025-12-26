@@ -4,7 +4,7 @@ import { workspaceService } from '../../services/WorkspaceService';
 import Modal from '../../components/ui/Modal';
 import Label from '../../components/ui/Lable';
 import Input from '../../components/ui/Input';
-import { Calendar, Check, Flag, Trash2, User } from 'lucide-react';
+import { Calendar, Check, Clock, Flag, Trash2, User } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import { taskService } from '../../services/TaskService';
 import TaskComments from './TaskComments';
@@ -30,6 +30,16 @@ const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEd
         setValue('title', taskToEdit.title);
         setValue('description', taskToEdit.description);
         setValue('priority', taskToEdit.priority);
+
+        // Format date cho input datetime-local (yyyy-MM-ddTHH:mm)
+        if (taskToEdit.dueDate) {
+            const date = new Date(taskToEdit.dueDate);
+            const formatted = date.toISOString().slice(0, 16); // Lấy yyyy-MM-ddTHH:mm
+            setValue('dueDate', formatted);
+        } else {
+            setValue('dueDate', '');
+        }
+
         const ids = new Set(taskToEdit.assignees?.map(u => u.id) || []);
         setSelectedAssignees(ids);
         setCurrentTask(taskToEdit); // Reset currentTask mỗi khi mở modal
@@ -159,6 +169,19 @@ const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEd
             </div>
 
             <hr className="border-gray-100" />
+
+            {/* --- MỚI: DATE PICKER --- */}
+            <div>
+              <Label className="text-gray-500 uppercase text-xs font-bold tracking-wide mb-2 block">Hạn chót (Deadline)</Label>
+              <div className="relative">
+                <Clock className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                <input
+                  type="datetime-local"
+                  {...register("dueDate")}
+                  className="w-full h-9 pl-9 pr-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:border-primary-500"
+                />
+              </div>
+            </div>
 
             <div>
               <Label className="text-gray-500 uppercase text-xs font-bold tracking-wide mb-2 block">Mức độ ưu tiên</Label>

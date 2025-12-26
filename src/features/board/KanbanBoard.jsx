@@ -165,6 +165,7 @@ const KanbanBoard = ({ projectId }) => {
         onToggleMyTasks={() => setFilterMyTasks(!filterMyTasks)}
         filterPriority={filterPriority}
         onFilterPriority={(p) => setFilterPriority(prev => prev === p ? null : p)}
+        projectId={projectId}
       />
       
       <div className="flex-1 overflow-x-auto overflow-y-hidden bg-gray-100/50 p-6">

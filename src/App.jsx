@@ -11,6 +11,7 @@ import AcceptInvitePage from './features/workspaces/AcceptInvitePage';
 import ForgotPasswordPage from './features/auth/ForgotPasswordPage';
 import ResetPasswordPage from './features/auth/ResetPasswordPage';
 import ProfilePage from './features/users/ProfilePage';
+import DashboardPage from './features/projects/DashboardPage';
 
 // Component bảo vệ Route (chỉ cho user đã login vào)
 const ProtectedRoute = () => {
@@ -63,6 +64,7 @@ function App() {
             <Route path="/workspaces/:workspaceId" element={<ProjectListPage />} />
             {/* Route mới: Khi click vào 1 project */}
              <Route path="/projects/:projectId/board" element={<BoardPage />} />
+             <Route path="/projects/:projectId/dashboard" element={<DashboardPage />} />
              <Route path="/profile" element={<ProfilePage />} />
           </Route>
         </Route>

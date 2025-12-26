@@ -11,5 +11,10 @@ export const projectService = {
   createProject: async (workspaceId, data) => {
     const res = await api.post(`/workspaces/${workspaceId}/projects`, data);
     return res.data;
+  },
+
+  getStats: async (projectId) => {
+    const res = await api.get(`/projects/${projectId}/stats`);
+    return res.data;
   }
 };
