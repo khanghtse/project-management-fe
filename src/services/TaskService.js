@@ -3,10 +3,10 @@ import api from "../libs/axios"
 export const taskService = {
     // Lấy dữ liệu Board
     getBoard: async (projectId, params) => {
-    // params = { keyword, priority, isMyTask }
-    const res = await api.get(`/projects/${projectId}/board`, { params });
-    return res.data;
-  },
+        // params = { keyword, priority, isMyTask }
+        const res = await api.get(`/projects/${projectId}/board`, { params });
+        return res.data;
+    },
 
     // Tạo Task mới
     createTask: async (projectId, data) => {
@@ -49,6 +49,10 @@ export const taskService = {
 
     getTask: async (taskId) => {
         const res = await api.get(`/tasks/${taskId}`);
+        return res.data;
+    },
+    getActivities: async (taskId) => {
+        const res = await api.get(`/tasks/${taskId}/activities`);
         return res.data;
     },
 }

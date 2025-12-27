@@ -11,6 +11,7 @@ import TaskComments from './TaskComments';
 import TaskChecklist from './TaskChecklist';
 import toast from 'react-hot-toast';
 import TaskAttachments from './TaskAttachments';
+import TaskActivities from './TaskActivities';
 
 const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEdit, onSuccess }) => {
   const { register, handleSubmit, reset, setValue } = useForm();
@@ -152,6 +153,9 @@ const TaskModal = ({ isOpen, onClose, projectId, columnId, workspaceId, taskToEd
 
             {/* Comments */}
             {currentTask && <TaskComments taskId={currentTask.id} />}
+
+            {/* --- MỚI: ACTIVITY LOGS --- */}
+            {currentTask && <TaskActivities taskId={currentTask.id} />}
           </div>
 
           {/* --- SIDEBAR --- */}
